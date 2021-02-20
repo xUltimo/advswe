@@ -19,16 +19,6 @@ export interface ICatDocument extends ICat, mongoose.Document {
   _id: mongoose.Schema.Types.ObjectId;
 }
 
-export interface GitHubUser {
-  username: string,
-  provider: string,
-  emails: {
-    value: string,
-    primary: boolean,
-    verified: boolean
-  }[]
-}
-
 
 export interface IUser {
   username: string,
@@ -56,54 +46,12 @@ export interface IUserDocument extends IUser, mongoose.Document {
  The model interface needs to be registered when creating the
  model from the schema (see ./user.ts for details)
  */
-export interface IUserModel extends IUser, mongoose.Model<IUserDocument> {
-  findOrCreate: (user: GitHubUser) => Promise<IUserDocument>;
-}
 
-export interface Image {
-  id: mongoose.Schema.Types.ObjectId,
-  description?: string,
-  uploaded: Date,
-  user: string
-}
 
-export interface IPOI {
-  name: string;
-  description?: string;
-  loc: {
-    type?: string,
-    coordinates: Array<number>
-  },
-  type: string;
-  creator?: mongoose.Schema.Types.ObjectId|{_id: string, username: string}|IUser;
-  createdAt?: Date,
-  images?: Image[];
-}
+
 
 export interface LoadableDocument<T extends mongoose.Document> {
   load: (id: mongoose.Schema.Types.ObjectId) => Promise<T>;
 }
 
-export interface IPOIDocument extends IPOI, mongoose.Document {
-  _id: mongoose.Schema.Types.ObjectId;
 
-}
-
-export interface IPOIModel extends IPOI, mongoose.Model<IPOIDocument>, LoadableDocument<IPOIDocument> {}
-
-export interface ITrip {
-  name: string;
-  description?: string;
-  begin?: Date;
-  end?: Date;
-  createdAt?: Date;
-  creator?: mongoose.Schema.Types.ObjectId|{_id: string, username: string};
-  pois: mongoose.Schema.Types.ObjectId[]|IPOI[];
-}
-
-export interface ITripDocument extends ITrip, mongoose.Document {
-  _id: mongoose.Schema.Types.ObjectId;
-}
-
-export interface ITripModel extends ITrip,
-  mongoose.Model<ITripDocument>, LoadableDocument<ITripDocument> {}
