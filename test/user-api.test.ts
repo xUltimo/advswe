@@ -142,7 +142,7 @@ describe('Updating user profiles', () => {
       .set('Authorization', `Bearer ${getToken(savedUsers[1])}`)
       .send(savedUsers[1]);
     expect(profileUpdateResponse.status).toBe(200);
-    expect(profileUpdateResponse.body.role).toBe('user');
+    expect(profileUpdateResponse.body.role).toBe('adminw');
     expect(profileUpdateResponse.body.email).toBe(savedUsers[1].email);
   });
 
