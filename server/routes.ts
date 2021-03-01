@@ -42,26 +42,19 @@ export default function setRoutes(app: Application, passport: PassportStatic) {
   app.use(passport.initialize());
 
   // Cats
-  router.route('/cats').get(catCtrl.getAll);
+
   /*
   *  #swagger.tags = ['Users']
   * */
-  router.route('/cats/count').get(jwtAuth, catCtrl.count);
-  router.route('/cat').post(jwtAuth, catCtrl.insert, catCtrl.show);
-  router.route('/cat/:id').get(catCtrl.get, catCtrl.show);
-  router.route('/cat/:id').put(catCtrl.update, catCtrl.show);
-  router.route('/cat/:id').delete(catCtrl.delete);
 
-  router.route('/login').post(userCtrl.login);
-  router.route('/users').get(jwtAuth, checkPermission(isAdmin), userCtrl.getList);
-  router.route('/users/count').get(jwtAuth, checkPermission(isAdmin), userCtrl.count);
-  router.route('/users').post(userCtrl.setRoleAndProvider, userCtrl.insert, userCtrl.show);
-  router.route('/users/:userId').get(jwtAuth, checkPermission(isAdminOrOwner(userId)), userCtrl.show);
-  router.route('/users/:userId').put(jwtAuth, checkPermission(isAdminOrOwner(userId)), protectRole,
-    userCtrl.update, userCtrl.show);
-  router.route('/users/:userId').delete(jwtAuth, checkPermission(isAdmin), userCtrl.delete);
+  var catroute = require('./routes/cats')(router, jwtAuth);
+  var userroute = require('./routes/users')(router, jwtAuth, checkPermission(isAdmin), checkPermission(isAdminOrOwner(userId)), protectRole)
 
-  router.param('userId', userCtrl.load);
+  //router.get('/cats/count', jwtAuth, catCtrl.count);
+
+//  router.route('/cats/count').get(jwtAuth, catCtrl.count);
+
+
 
   app.use('/api', router);
 
