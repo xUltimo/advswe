@@ -47,6 +47,20 @@ export interface IUserDocument extends IUser, mongoose.Document {
  model from the schema (see ./user.ts for details)
  */
 
+export interface GitHubUser {
+  username: string,
+  provider: string,
+  emails: {
+    value: string,
+    primary: boolean,
+    verified: boolean
+  }[]
+}
+
+export interface IUserModel extends IUser, mongoose.Model<IUserDocument> {
+  findOrCreate: (user: GitHubUser) => Promise<IUserDocument>;
+}
+
 
 
 
