@@ -13,6 +13,14 @@ import * as github from 'passport-github';
 import passport from 'passport';
 
 import User from './models/user';
+import * as logger from '../Logger';
+
+const fs = require('fs');
+//const path = require('path');
+
+
+var swaggerJsdoc = require("swagger-jsdoc");
+var  swaggerUi = require("swagger-ui-express");
 
 // dotenv.load('.env');
 
@@ -46,6 +54,19 @@ passport.use(new github.Strategy({
   )
 );
 
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Headers', 'X-Requested-With, Content-Type, Authorization');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, DELETE, PUT');
+  res.header('Access-Control-Allow-Credentials', 'true');
+  if ('OPTIONS' === req.method) {
+    res.sendStatus(200);
+  } else {
+    next();
+  }
+});
+
+
 
 app.set('port', (process.env.PORT || 3000));
 
@@ -61,8 +82,41 @@ app.use(morgan('dev'));
 setRoutes(app, passport);
 
 
+<<<<<<< HEAD
+logger.info('Registered Routes');
+=======
 
 
+var swaggerDefinition = require('./swaggerDefinition')
+
+const options = {
+  swaggerDefinition,
+  // Path to the API docs
+  apis: ['./server/routes.ts','./server/routes/users.ts','./server/routes/poi.ts','./server/routes/trips.ts'],
+
+}
+
+const specs = swaggerJsdoc(options);
+
+
+app.get('/api-docs/swagger.json', (req, res) => {
+  res.setHeader('Content-Type', 'application/json');
+  res.send(specs);
+});
+
+
+app.use(
+  "/api-docs",
+  swaggerUi.serve,
+  swaggerUi.setup(specs)
+);
+
+
+
+
+
+catSystem.info('Registered Routes');
+>>>>>>> master
 app.get('/*', function(req, res) {
   res.sendFile(path.join(__dirname, '../public/index.html'));
 });

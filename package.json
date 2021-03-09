@@ -64,6 +64,8 @@
     "swagger-ui-express": "^4.1.6",
     "tether": "^1.4.7",
     "typescript-logging": "^1.0.0",
+    "winston": "^3.3.3",
+    "winston-elasticsearch": "^0.15.2",
     "zone.js": "~0.10.2"
   },
   "devDependencies": {

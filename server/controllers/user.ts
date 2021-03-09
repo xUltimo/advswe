@@ -9,11 +9,10 @@ export default class UserCtrl extends BaseCtrl<IUserDocument> {
   projection = '_id username email';
 
   login = (req, res) => {
-    /*
-    #swagger.tags = ['User']
-    #swagger.description = 'Endpoint to sign in a specific user'
-    */
+
     this.model.findOne({email: req.body.email}, (err, user) => {
+
+
       if (!user) {
         return res.sendStatus(403);
       }

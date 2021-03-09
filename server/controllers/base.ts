@@ -1,4 +1,4 @@
-import {catController} from '../logging';
+
 import mongoose from 'mongoose';
 
 abstract class BaseCtrl<T extends mongoose.Document> {
@@ -17,7 +17,6 @@ abstract class BaseCtrl<T extends mongoose.Document> {
     this.model.find({})
       .then(docs => res.json(docs))
       .catch(err => {
-        catController.error('Error while finding documents', err);
         res.status(500).send({message: err})
       });
   }
@@ -42,7 +41,6 @@ abstract class BaseCtrl<T extends mongoose.Document> {
       .then(m => (this.model.hasOwnProperty('load')) ? this.model['load'](m._id) : m)
       .then(m => {
         if (m == null) {throw new Error('Element not found')};
-        catController.debug('Loaded entity: ' + JSON.stringify(m));
         req[this.model.collection.collectionName] = m})
       .then(() => next())
       .catch(err => res.status(500).json({message: `Could not load this element (${err})`}));
@@ -88,7 +86,7 @@ abstract class BaseCtrl<T extends mongoose.Document> {
       .then(m => req[this.model.collection.collectionName] = m)
       .then(() => next())
       .catch(err => {
-        catController.error(`Could not update id=${req[this.model.collection.collectionName]._id}`, err);
+
         res.status(500).json({message: err});
       });
 
@@ -97,7 +95,7 @@ abstract class BaseCtrl<T extends mongoose.Document> {
     this.model.findOneAndRemove({ _id: req[this.model.collection.collectionName]._id })
       .then(() => res.sendStatus(200))
       .catch((err) => {
-        catController.error(`Could not delete id=${req[this.model.collection.collectionName]._id}`, err);
+
         res.status(500).send({message: err})
       })
 
