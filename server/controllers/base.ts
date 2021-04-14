@@ -1,9 +1,8 @@
-
-import mongoose from 'mongoose';
+import * as mongoose from 'mongoose';
 
 abstract class BaseCtrl<T extends mongoose.Document> {
 
-// Defines the Model that is used for all CRUD operations
+  // Defines the Model that is used for all CRUD operations
   abstract model: mongoose.Model<T>;
   // A string representing a space-separated list of fields that should be
   // returned by getList()
@@ -12,22 +11,17 @@ abstract class BaseCtrl<T extends mongoose.Document> {
 
   // Get all enities of type model
   getAll = (req, res) => {
-    // #swagger.tags = ['User', 'Trip']
-
-    this.model.find({})
-      .then(docs => res.json(docs))
-      .catch(err => {
-        res.status(500).send({message: err})
-      });
-  }
-
+    this.model.find({}, (err, docs) => {
+      if (err) { return console.error(err); }
+      res.json(docs);
+    });
+  };
 
   // Returns all entities but only those fields contained in 'projection'
-  getList = (req, res) => {
+  getList = (req, res) =>
     this.model.find({}, this.projection)
       .then(l => res.json(l))
       .catch(err => res.status(500).json({message: err}));
-  }
 
   /*
     loads a single instance from the database. If this instance is found and the schema
@@ -50,9 +44,6 @@ abstract class BaseCtrl<T extends mongoose.Document> {
 
   // Count all
   count = (req, res) => {
-    /*  #swagger.tags = ['User']
-        #swagger.description = 'Endpoint to add a user.' */
-
     this.model.count({}).then(count => res.json(count))
       .catch(err => res.status(500).json({message: err}));
   };
@@ -68,7 +59,7 @@ abstract class BaseCtrl<T extends mongoose.Document> {
       .then(m => (this.model.hasOwnProperty('load')) ? this.model['load'](m._id) : m)
       .then(m => req[this.model.collection.collectionName] = m)
       .then(() => next())
-      .catch(err => err.code === 11000 ? next(err) : res.status(err.code === 11000 ? 400 : 500).json({message: err}));
+      .catch(err => res.status(err.code === 11000 ? 400 : 500).json({message: err}));
   };
 
   // Get by id
@@ -86,85 +77,17 @@ abstract class BaseCtrl<T extends mongoose.Document> {
       .then(m => req[this.model.collection.collectionName] = m)
       .then(() => next())
       .catch(err => {
-
+        console.error(err);
         res.status(500).json({message: err});
       });
 
   // Delete by id
-  delete = (req, res) =>
-    this.model.findOneAndRemove({ _id: req[this.model.collection.collectionName]._id })
-      .then(() => res.sendStatus(200))
-      .catch((err) => {
-
-        res.status(500).send({message: err})
-      })
-
-  /*
-  abstract model: any;
-
-  // Get all
-  getAll = async (req, res) => {
-    try {
-      const docs = await this.model.find({});
-      res.status(200).json(docs);
-    } catch (err) {
-      return res.status(400).json({ error: err.message });
-    }
-  }
-
-  // Count all
-  count = async (req, res) => {
-    try {
-      const count = await this.model.count();
-      res.status(200).json(count);
-    } catch (err) {
-      return res.status(400).json({ error: err.message });
-    }
-  }
-
-  // Insert
-  insert = async (req, res) => {
-    try {
-      const obj = await new this.model(req.body).save();
-      res.status(201).json(obj);
-    } catch (err) {
-      return res.status(400).json({ error: err.message });
-    }
-  }
-
-  // Get by id
-  get = async (req, res) => {
-    try {
-      const obj = await this.model.findOne({ _id: req.params.id });
-      res.status(200).json(obj);
-    } catch (err) {
-      return res.status(500).json({ error: err.message });
-    }
-  }
-
-  // Update by id
-  update = async (req, res) => {
-    try {
-      await this.model.findOneAndUpdate({ _id: req.params.id }, req.body);
+  delete = (req, res) => {
+    this.model.findOneAndRemove({ _id: req[this.model.collection.collectionName]._id }, (err) => {
+      if (err) { return console.error(err); }
       res.sendStatus(200);
-    } catch (err) {
-      return res.status(400).json({ error: err.message });
-    }
-  }
-
-
-  // Delete by id
-  delete = async (req, res) => {
-    try {
-      await this.model.findOneAndRemove({ _id: req.params.id });
-      res.sendStatus(200);
-    } catch (err) {
-      return res.status(400).json({ error: err.message });
-    }
-  }
-
-
-   */
+    });
+  };
 }
 
 export default BaseCtrl;

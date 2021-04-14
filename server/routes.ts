@@ -2,10 +2,12 @@ import * as express from 'express';
 
 import CatCtrl from './controllers/cat';
 import UserCtrl from './controllers/user';
+
 import {PassportStatic} from 'passport';
 import {Application} from 'express';
 import * as jwt from 'jsonwebtoken';
 import multer from 'multer';
+import POICtrl from "./controllers/poi";
 
 const upload = multer({ dest: 'uploads/' });
 
@@ -18,7 +20,7 @@ export default function setRoutes(app: Application, passport: PassportStatic) {
 
   const catCtrl = new CatCtrl();
   const userCtrl = new UserCtrl();
-
+  const poiCtrl = new POICtrl();
 
   const jwtAuth = passport.authenticate('jwt', { session: false});
   const isOwner = (extractor: (Request) => string) =>
@@ -49,7 +51,7 @@ export default function setRoutes(app: Application, passport: PassportStatic) {
 
   var catroute = require('./routes/cats')(router, jwtAuth);
   var userroute = require('./routes/users')(router, jwtAuth, checkPermission(isAdmin), checkPermission(isAdminOrOwner(userId)), protectRole)
-
+  var poiroute = require('./routes/pois')(router, jwtAuth, checkPermission(isAdminOrOwner(userId)));
   //router.get('/cats/count', jwtAuth, catCtrl.count);
 
 //  router.route('/cats/count').get(jwtAuth, catCtrl.count);

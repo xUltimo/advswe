@@ -9,4 +9,6 @@ module.exports = function(router, jwtAuth) {
   router.route('/cat/:id').put(catCtrl.update, catCtrl.show);
   router.route('/cat/:id').delete(catCtrl.delete);
   router.route('/cats').get(catCtrl.getAll);
+
+  router.param('id', catCtrl.load);
 }
