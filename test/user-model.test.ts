@@ -1,122 +1,66 @@
-
 import dotenv from 'dotenv';
 import mongoose from 'mongoose';
-dotenv.config({path: '.env.test'});
-import Cat from '../server/models/cat';
 import User from '../server/models/user';
-import bcrypt from 'bcryptjs';
-import {GitHubUser} from '../server/models/types';
+import POI from '../server/models/poi';
+import {createAndSaveUsers} from './helpers';
+import {IPOI, IPOIDocument} from '../server/models/types';
 
-mongoose.connect(process.env.MONGODB_URI,  { useNewUrlParser: true } );
+dotenv.config({path: '.env.test'});
+
+mongoose.connect(process.env.MONGODB_URI, {useNewUrlParser: true});
 const db = mongoose.connection;
-(<any>mongoose).Promise = global.Promise;
 
-
-const clearDB = () => Promise.all([User.deleteMany({}), Cat.deleteMany({})]);
-
-afterAll(async () => await clearDB());
+const clearDB = () => Promise.all([User.deleteMany({}), POI.deleteMany({})]);
 
 beforeEach(async () => await clearDB());
+afterEach(async () => await clearDB());
 
-describe('User Schema', () => {
-  it('should not allow to create empty users', (done) => {
-    const user = {};
-    new User(user).save().then(() => done('Empty user\'s are not allowed to be stored'))
-      .catch(err => {
-        const errors = err.errors;
-        expect(errors.provider).toBeDefined();
-        expect(errors.provider.kind).toBe('required');
-        expect(errors.email).toBeDefined();
-        expect(errors.email.kind).toBe('required');
-        expect(errors.username).toBeDefined();
-        expect(errors.username.kind).toBe('required');
-        expect(errors.role).toBeDefined();
-        expect(errors.role.kind).toBe('required');
-        done();
-      });
-  });
-  it('should not allow to create a user with unknown role', (done) => {
-    const user = {
-      username: 'test',
-      email : 'test@test.com',
-      password: 'topsecret',
-      provider: 'local',
-      role: 'test'
-    };
-    new User(user).save().then(() => done('User\'s without valid roles are not allowed to be stored'))
-      .catch(err => {
-        const errors = err.errors;
-        expect(errors.role).toBeDefined();
-        expect(errors.role.kind).toBe('enum');
-        done();
-      });
-  });
-  it('should not allow to create users with invalid email', async () => {
-    const user = {
-      username: 'test',
-      email : 'email',
-      password: 'topsecret',
-      provider: 'local',
-      role: 'user'
-    };
+describe('POI Model', () => {
+  it('should not be possible to create a POI with missing properties', async () => {
     try {
-      const newUser = await new User(user).save();
-      expect(newUser).toBeUndefined();
+      await new POI().save();
+      throw Error('This should fail with an error!');
     } catch (err) {
       const errors = err.errors;
-      expect(errors.email).toBeDefined();
-      expect(errors.email.kind).toBe('user defined');
-      expect(errors.email.path).toBe('email');
+      expect(errors.creator).toBeDefined();
+      expect(errors.creator.kind).toBe('required');
+      expect(errors.name).toBeDefined();
+      expect(errors.name.kind).toBe('required');
+      expect(errors.loc).toBeDefined();
+      expect(errors.loc.kind).toBe('required');
     }
   });
-  it('should allow users to be created', async () => {
-    const user = {
-      username: 'test',
-      email : 'test@test.com',
-      password: 'topsecret',
-      provider: 'local',
-      role: 'user'
+  it('should store a POI', async () => {
+    const savedUsers = await createAndSaveUsers(1);
+    const poi: IPOI = {
+      name: 'POI1',
+      loc: {coordinates: [1, 1]},
+      creator: savedUsers[0]._id,
+      type: 'museum'
     };
-    const newUser = await new User(user).save();
-    expect(newUser._id).toBeDefined();
-    expect(bcrypt.compareSync('topsecret', newUser.password)).toBeTruthy();
+    const savedPOI = await new POI(poi).save();
+    expect(savedPOI._id).toBeDefined();
+    expect(savedPOI.createdAt).toBeDefined();
+    expect(savedPOI.name).toBe('POI1');
+    expect(savedPOI.loc.coordinates.length).toBe(2);
+    expect(savedPOI.creator).toEqual(savedUsers[0]._id);
   });
-  it('should find or create a new user', async () => {
-    const gitHubUser: GitHubUser = {
-      username: 'githubuser',
-      provider: 'github',
-      emails: [
-        {value: 'test@github.com', primary: true, verified: true},
-        {value: 'test@users.noreply.github.com', primary: false, verified: true},
-      ]
+  it('should resolve the creator when retrieved with load', async () => {
+    const savedUsers = await createAndSaveUsers(1);
+    const poi: IPOI = {
+      name: 'POI1',
+      loc: {coordinates: [1, 1]},
+      creator: savedUsers[0]._id,
+      type: 'museum'
     };
-
-    const checkUser = (result, oauthUser) => {
-      expect(result.username).toBe(oauthUser.username);
-      expect(result.email).toBe(oauthUser.emails[0].value);
-      expect(result._id).toBeDefined();
-      expect(result.provider).toBe(oauthUser.provider);
-      expect(result.role).toBe('user');
-    };
-    const user1 = await User.findOrCreate(gitHubUser);
-    checkUser(user1, gitHubUser);
-    const user2 = await User.findOrCreate(gitHubUser);
-    checkUser(user2, gitHubUser);
-    expect(user1._id).toEqual(user2._id);
-  });
-
-  it('should update an existing entry', async () => {
-    const user = {
-      username: 'test',
-      email : 'test@test.com',
-      password: 'topsecret',
-      provider: 'local',
-      role: 'user'
-    };
-    const savedUser = await new User(user).save();
-    const changedUser = Object.assign({}, user);
-    changedUser.username = 'dummy';
-    const updatedUser = await User.findOneAndUpdate({_id: savedUser._id}, changedUser, {new: true});
-    expect(updatedUser.username).toBe('dummy');
-  });
+    const savedPOI = await new POI(poi).save();
+    const readPOI: IPOIDocument = await POI.load(savedPOI._id);
+    expect(readPOI._id).toBeDefined();
+    expect(readPOI.createdAt).toBeDefined();
+    expect(readPOI.name).toBe('POI1');
+    expect(readPOI.loc.coordinates.length).toBe(2);
+    const creator = readPOI.creator as {_id: string, username: string}
+    expect(creator._id).toEqual(savedUsers[0]._id);
+    expect(creator.username).toBe(savedUsers[0].username);
+  })
 });
