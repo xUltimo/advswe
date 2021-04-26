@@ -197,15 +197,15 @@ module.exports = function(router, jwtAuth, isOwner, isAdminOrOwner) {
    * @swagger
    * /trips/{tripId}/{poiId}:
    *   delete:
-   *     summary: Delete a poi from a trip
-   *     description: Delete a poi with the given id from a trip in the TravelLog.
+   *     summary: Delete a POI from a trip
+   *     description: Delete a POI with the given id from a trip in the TravelLog.
    *     tags:
    *       - Trips
    *     security:
    *       - jwt: []
    *     responses:
    *       200:
-   *         description: Poi deleted from trip
+   *         description: POI deleted from trip
    *         content:
    *           application/json:
    *             schema:
@@ -217,7 +217,7 @@ module.exports = function(router, jwtAuth, isOwner, isAdminOrOwner) {
    *       403:
    *         description: Permission insufficient
    *       500:
-   *         description: Poi not found
+   *         description: POI not found
    */
   router.route('/trips/:tripId/:poiId').delete(jwtAuth, isOwner, tripCtrl.removePoi, tripCtrl.show); //8 //TODO
 
