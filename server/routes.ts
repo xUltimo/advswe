@@ -13,8 +13,6 @@ import TripCtrl from './controllers/trip';
 const upload = multer({ dest: 'uploads/' });
 
 
-
-
 export default function setRoutes(app: Application, passport: PassportStatic) {
 
   const router = express.Router();
@@ -47,14 +45,13 @@ export default function setRoutes(app: Application, passport: PassportStatic) {
 
   // Cats
 
-  /*
-  *  #swagger.tags = ['Users']
-  * */
   /**
    * @openapi
    * tags:
-   *   name: Users
-   *   description: User management and login
+   *   - name: Users
+   *     description: User management and login
+   *   - name: Trips
+   *     description: Trip management and stuff
    */
 
   /**
@@ -63,14 +60,7 @@ export default function setRoutes(app: Application, passport: PassportStatic) {
    * @swagger
    * components:
    *   schemas:
-   *     DBObject:
-   *       type: object
-   *       properties:
-   *           _id:
-   *             type: string
-   *             description: An Database ID id.
-   *             example: 60329de352647118c8eb8dee
-   *     User:
+   *     AbstractUser:
    *       type: object
    *       properties:
    *         username:
@@ -91,7 +81,7 @@ export default function setRoutes(app: Application, passport: PassportStatic) {
    *           description: The user's provider.
    *     NewUser:
    *       allOf:
-   *         - $ref: '#/components/schemas/User'
+   *         - $ref: '#/components/schemas/AbstractUser'
    *         - type: object
    *           properties:
    *             password:
@@ -100,9 +90,45 @@ export default function setRoutes(app: Application, passport: PassportStatic) {
    *               example: verysecret
    *     DBUser:
    *       allOf:
-   *         - $ref: '#/components/schemas/User'
+   *         - $ref: '#/components/schemas/AbstractUser'
    *         - $ref: '#/components/schemas/DBObject'
-   *
+   *     AbstractTrip:
+   *       type: object
+   *       properties:
+   *         name:
+   *           type: string
+   *           description: The trip name.
+   *           example: Paris Trip
+   *         description:
+   *           type: string
+   *           description: The trip description.
+   *           example: A fun trip to Paris doing fun stuff.
+   *         begin:
+   *           type: date
+   *           description: The start-date of the trip.
+   *         end:
+   *           type: date
+   *           description: The end-date of the trip.
+   *     NewTrip:
+   *       allOf:
+   *         - $ref: '#/components/schemas/AbstractTrip'
+   *       type: object
+   *       properties:
+   *          creator:
+   *           type: object
+   *           description: The user that created the trip.
+   *          pois:
+   *           type: object
+   *           description: The pois of the trip.
+   *     DBTrip:
+   *       allOf:
+   *         - $ref: '#/components/schemas/AbstractTrip'
+   *         - $ref: '#/components/schemas/DBTrip'
+   *       type: object
+   *       properties:
+   *          createdAt:
+   *           type: date
+   *           description: The creation-date of the trip.
    */
 
 
@@ -110,13 +136,8 @@ export default function setRoutes(app: Application, passport: PassportStatic) {
 
   var catroute = require('./routes/cats')(router, jwtAuth);
   var userroute = require('./routes/users')(router, jwtAuth, checkPermission(isAdmin), checkPermission(isAdminOrOwner(userId)), protectRole)
-  //var poiroute = require('./routes/pois')(router, jwtAuth, checkPermission(isAdmin), checkPermission(isAdminOrOwner(userId)));
-  var poitroute = require('./routes/pois')(router, jwtAuth, checkPermission(isOwner(poiOwner)), checkPermission(isAdminOrOwner(poiOwner)));
-  var triproute = require('./routes/trips')(router, jwtAuth, checkPermission(isOwner), checkPermission(isAdminOrOwner(userId)));
-  //router.get('/cats/count', jwtAuth, catCtrl.count);
-
-//  router.route('/cats/count').get(jwtAuth, catCtrl.count);
-
+  var poiroute = require('./routes/pois')(router, jwtAuth, checkPermission(isOwner(poiOwner)), checkPermission(isAdminOrOwner(poiOwner)));
+  var triproute = require('./routes/trips')(router, jwtAuth, checkPermission(isOwner(tripOwner)), checkPermission(isAdminOrOwner(tripOwner)));
 
 
   app.use('/api', router);

@@ -3,46 +3,7 @@ import UserCtrl from "../controllers/user";
 module.exports = function(router, jwtAuth, isAdmin, isOwner, protectRole) {
   const userCtrl = new UserCtrl();
 
-  /**
-   *
-   *
-   * @swagger
-   * components:
-   *   schemas:
-   *     AbstractUser:
-   *       type: object
-   *       properties:
-   *         username:
-   *           type: string
-   *           description: The user's username.
-   *           example: BobMcDonald
-   *         email:
-   *           type: string
-   *           description: The user's email.
-   *           example: BobMcDonald@travellog.com
-   *         role:
-   *           type: string
-   *           enum: [user, admin]
-   *           description: The user's role.
-   *         provider:
-   *           type: string
-   *           enum: [local, remote]
-   *           description: The user's provider.
-   *     NewUser:
-   *       allOf:
-   *         - $ref: '#/components/schemas/AbstractUser'
-   *         - type: object
-   *           properties:
-   *             password:
-   *               type: string
-   *               description: The user's password.
-   *               example: verysecret
-   *     DBUser:
-   *       allOf:
-   *         - $ref: '#/components/schemas/AbstractUser'
-   *         - $ref: '#/components/schemas/DBObject'
-   *
-   */
+
 
 
 

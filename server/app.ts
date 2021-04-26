@@ -57,7 +57,7 @@ var swaggerDefinition = getSwagger();
 const options = {
   swaggerDefinition,
   // Path to the API docs
-  apis: ['./server/routes.ts','./server/routes/users.ts'],
+  apis: ['./server/routes.ts','./server/routes/users.ts', './server/routes/trips.ts', './server/routes/pois.ts', './server/routes/cats.ts'],
 
 }
 
