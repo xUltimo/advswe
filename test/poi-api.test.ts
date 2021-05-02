@@ -6,17 +6,20 @@ import {app} from '../server/app';
 import POI from '../server/models/poi';
 import User from '../server/models/user';
 import {IPOI, IPOIDocument, IUser} from '../server/models/types';
-import {createUsers, saveUsers , getToken} from './helpers';
+import {createUsers, saveUsers, getToken, createAndSaveUsers, createAndSavePOIs} from './helpers';
+import fs from 'fs';
 
 
 
 mongoose.connect(process.env.MONGODB_URI, {useNewUrlParser: true});
 const db = mongoose.connection;
 
-const clearDB = () => {
-  console.log('Delete all database entries!');
-  return Promise.all([User.deleteMany({}), POI.deleteMany({})]);
-}
+const clearDB = () => Promise.all([User.deleteMany({}),
+  POI.deleteMany({}),
+  db.collection('fs.chunks').remove({}),
+  db.collection('fs.files').remove({})
+]);
+
 
 
 beforeEach(async () => await clearDB());
@@ -128,5 +131,58 @@ describe('Update POIs', () => {
     expect(updateResponse.status).toBe(200);
     expect(updateResponse.body.name).toBe('changed POI');
     expect(updateResponse.body.creator._id.toString()).toBe(savedUsers[0]._id.toString());
+  });
+});
+
+
+//Image tests
+describe('Add Image', () => {
+  it('should support adding images to POIs', async () => {
+    const savedUsers = await createAndSaveUsers(1);
+    const pois = await createAndSavePOIs(3, savedUsers[0]);
+    const poiToAddImage = pois[0];
+    const addImageResponse = await supertest(app)
+      .post(`/api/pois/${poiToAddImage._id}/image`)
+      .set('Authorization', `Bearer ${getToken(savedUsers[0])}`)
+      .field('description', 'A Test Image')
+      .attach('file', fs.createReadStream('test/images/test.png'));
+    expect(addImageResponse.status).toBe(200);
+    const updatedPOI = await POI.load(poiToAddImage._id);
+    expect(updatedPOI.images).toBeInstanceOf(Array);
+    expect(updatedPOI.images).toHaveLength(1);
+    const testImage = updatedPOI.images[0];
+    expect(testImage.description).toBe('A Test Image');
+  });
+  it('should not be possible to add images to somebody else\'s POIs', async () => {
+    const savedUsers = await createAndSaveUsers(2);
+    const pois = await createAndSavePOIs(3, savedUsers[0]);
+    const poiToAddImage = pois[0];
+    const addImageResponse = await supertest(app)
+      .post(`/api/pois/${poiToAddImage._id}/image`)
+      .set('Authorization', `Bearer ${getToken(savedUsers[1])}`)
+      .field('description', 'A Test Image')
+      .attach('file', fs.createReadStream('test/images/test.png'));
+    expect(addImageResponse.status).toBe(403);
+  });
+});
+
+describe('Get Image', () => {
+  it('should be possible to download any image', async () => {
+    const savedUsers = await createAndSaveUsers(1);
+    const pois = await createAndSavePOIs(3, savedUsers[0]);
+    const poiToAddImage = pois[0];
+    const addImageResponse = await supertest(app)
+      .post(`/api/pois/${poiToAddImage._id}/image`)
+      .set('Authorization', `Bearer ${getToken(savedUsers[0])}`)
+      .field('description', 'A Test Image')
+      .attach('file', fs.createReadStream('test/images/test.png'));
+    expect(addImageResponse.status).toBe(200);
+    const poiWithImage = await POI.findOne({_id: poiToAddImage._id});
+    const imageId = poiWithImage.images[0].id;
+    const getImageResponse = await supertest(app)
+      .get(`/api/pois/images/${imageId}`)
+      .set('Authorization', `Bearer ${getToken(savedUsers[0])}`);
+    expect(getImageResponse.status).toBe(200);
+    expect(getImageResponse.type).toEqual('image/png')
   });
 });

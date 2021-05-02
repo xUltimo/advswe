@@ -37,13 +37,23 @@ const poiSchema = new mongoose.Schema({
   createdAt: {
     type: Date,
     default: Date.now
-  }
+  },
+   images: [
+     {
+       id: mongoose.Schema.Types.ObjectId,
+       description: String,
+       uploaded: {
+         type: Date,
+         default: Date.now
+       },
+       user: String,
+     }
+   ]
 });
 
 poiSchema.index({
   loc: '2dsphere'
 });
-
 
 
 poiSchema.statics.load = function(id: mongoose.Schema.Types.ObjectId) {
