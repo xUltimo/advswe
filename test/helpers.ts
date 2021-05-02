@@ -58,3 +58,4 @@ export const saveTrips = (trips: ITrip[]): Promise<ITripDocument[]> =>
 
 export const createAndSaveTrips = (number: number, creator: IUserDocument, numberOfPOIs = 5): Promise<ITripDocument[]> =>
   saveTrips(createTrips(number, creator, numberOfPOIs));
+

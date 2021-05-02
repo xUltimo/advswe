@@ -10,3 +10,4 @@ describe('Create Info Log', () => {
     logger.debug("Debug Message", "Main");
   });
 });
+

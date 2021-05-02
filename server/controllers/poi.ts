@@ -64,6 +64,7 @@ export default class POICtrl extends BaseCtrl<IPOIDocument> {
     try {
       const bucket = createBucket();
       const id = mongoose.Types.ObjectId(req.params.imageId);
+
       bucket.findOne({_id: id}, (err, file) => {
         if (err) {
           logger.error('Could not read image from database', err);

@@ -1,2 +1,8 @@
 {"level":"info","message":"My New Info Message","fields":{"topic":"Main","hostname":"MSI","data":""},"service":"user-service"}
 {"level":"debug","message":"Debug Message","fields":{"topic":"Main","hostname":"MSI","data":""},"service":"user-service"}
+{"level":"info","message":"My New Info Message","fields":{"topic":"Main","hostname":"MSI","data":""},"service":"user-service"}
+{"level":"debug","message":"Debug Message","fields":{"topic":"Main","hostname":"MSI","data":""},"service":"user-service"}
+{"level":"info","message":"My New Info Message","fields":{"topic":"Main","hostname":"MSI","data":""},"service":"user-service"}
+{"level":"debug","message":"Debug Message","fields":{"topic":"Main","hostname":"MSI","data":""},"service":"user-service"}
+{"level":"info","message":"My New Info Message","fields":{"topic":"Main","hostname":"MSI","data":""},"service":"user-service"}
+{"level":"debug","message":"Debug Message","fields":{"topic":"Main","hostname":"MSI","data":""},"service":"user-service"}
