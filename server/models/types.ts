@@ -62,8 +62,6 @@ export interface IUserModel extends IUser, mongoose.Model<IUserDocument> {
 }
 
 
-
-
 export interface LoadableDocument<T extends mongoose.Document> {
   load: (id: mongoose.Schema.Types.ObjectId) => Promise<T>;
 }
@@ -77,7 +75,7 @@ export interface IPOI {
   },
   type: string;
   creator?: mongoose.Schema.Types.ObjectId|{_id: string, username: string}|IUser;
-  createdAt?: Date
+  createdAt?: Date,
   images?: Image[];
 }
 
@@ -88,7 +86,6 @@ export interface LoadableDocument<T extends mongoose.Document> {
 export interface IPOIDocument extends IPOI, mongoose.Document {
   _id: mongoose.Schema.Types.ObjectId;
 }
-
 
 export interface IPOIModel extends IPOI, mongoose.Model<IPOIDocument>, LoadableDocument<IPOIDocument> {}
 

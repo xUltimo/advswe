@@ -10,7 +10,6 @@ import {createUsers, saveUsers, getToken, createAndSaveUsers, createAndSavePOIs}
 import fs from 'fs';
 
 
-
 mongoose.connect(process.env.MONGODB_URI, {useNewUrlParser: true});
 const db = mongoose.connection;
 
